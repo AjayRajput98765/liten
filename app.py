@@ -129,7 +129,8 @@ def index():
     return render_template('index.html', 
                          features=FEATURES,
                          classes=CLASSES,
-                         founders=FOUNDERS)
+                         founders=FOUNDERS,
+                         current_user=current_user)
 
 @app.route('/class/<int:class_id>')
 def class_details(class_id):
@@ -140,23 +141,32 @@ def class_details(class_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
     if request.method == 'POST':
         data = request.get_json()
-        username = data.get('username')
+        email = data.get('username')  # Can be email or username
         password = data.get('password')
         
-        user = User.query.filter_by(username=username).first()
+        # Try to find user by email first, then by username
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User.query.filter_by(username=email).first()
         
         if user and check_password_hash(user.password, password):
             login_user(user)
             return jsonify({'success': True, 'redirect': url_for('dashboard')})
         else:
-            return jsonify({'success': False, 'error': 'Invalid username or password'})
+            return jsonify({'success': False, 'error': 'Invalid email or password'})
     
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
     if request.method == 'POST':
         data = request.get_json()
         username = data.get('username')
@@ -170,12 +180,10 @@ def register():
         if password != confirm_password:
             return jsonify({'success': False, 'error': 'Passwords do not match'})
         
-        if User.query.filter_by(username=username).first():
-            return jsonify({'success': False, 'error': 'Username already exists'})
-        
         if User.query.filter_by(email=email).first():
             return jsonify({'success': False, 'error': 'Email already exists'})
         
+        # Create user with email as primary identifier
         user = User(
             username=username,
             email=email,
@@ -184,6 +192,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         
+        # Automatically log in the user after registration
         login_user(user)
         return jsonify({'success': True, 'redirect': url_for('dashboard')})
     
