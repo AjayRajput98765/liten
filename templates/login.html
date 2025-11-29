@@ -620,9 +620,9 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="grade">Grade Level</label>
+                                    <label for="grade">Select Your Class</label>
                                     <select id="grade" name="grade" required>
-                                        <option value="">Select Grade</option>
+                                        <option value="">Choose Your Class</option>
                                         <option value="1">Class 1</option>
                                         <option value="2">Class 2</option>
                                         <option value="3">Class 3</option>
@@ -720,7 +720,10 @@
             btn.textContent = 'Signing In...';
 
             try {
-                const response = await fetch('{{ url_for("login") }}', {
+                const loginUrl = '{{ url_for("login") }}';
+                console.log('Sending login to:', loginUrl);
+                
+                const response = await fetch(loginUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -728,7 +731,14 @@
                     body: JSON.stringify({ username: email, password: password })
                 });
 
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
+                console.log('Response data:', data);
 
                 if (data.success) {
                     showAlert('Login successful! Redirecting...', 'success');
@@ -741,7 +751,8 @@
                     btn.textContent = 'Sign In';
                 }
             } catch (error) {
-                showAlert('Error: ' + error, 'error');
+                console.error('Error details:', error);
+                showAlert('Connection Error: ' + error.message + '. Please check if the server is running.', 'error');
                 btn.disabled = false;
                 btn.textContent = 'Sign In';
             }
@@ -754,6 +765,7 @@
             const confirmPassword = document.getElementById('confirm-password').value;
             const firstName = document.getElementById('first-name').value;
             const lastName = document.getElementById('last-name').value;
+            const grade = document.getElementById('grade').value;
             const btn = document.getElementById('signupBtn');
 
             if (password !== confirmPassword) {
@@ -761,11 +773,19 @@
                 return;
             }
 
+            if (!grade) {
+                showAlert('Please select your class!', 'error');
+                return;
+            }
+
             btn.disabled = true;
             btn.textContent = 'Creating Account...';
 
             try {
-                const response = await fetch('{{ url_for("register") }}', {
+                const registerUrl = '{{ url_for("register") }}';
+                console.log('Sending registration to:', registerUrl);
+                
+                const response = await fetch(registerUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -774,11 +794,19 @@
                         username: firstName + ' ' + lastName,
                         email: email,
                         password: password,
-                        confirm_password: confirmPassword
+                        confirm_password: confirmPassword,
+                        grade: grade
                     })
                 });
 
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
+                console.log('Response data:', data);
 
                 if (data.success) {
                     showAlert('Account created successfully! Redirecting...', 'success');
@@ -791,7 +819,8 @@
                     btn.textContent = 'Create Account';
                 }
             } catch (error) {
-                showAlert('Error: ' + error, 'error');
+                console.error('Error details:', error);
+                showAlert('Connection Error: ' + error.message + '. Please check if the server is running.', 'error');
                 btn.disabled = false;
                 btn.textContent = 'Create Account';
             }

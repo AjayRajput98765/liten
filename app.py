@@ -8,9 +8,10 @@ import os
 app = Flask(__name__)
 
 # Configuration
-app.config['SECRET_KEY'] = 'your-secret-key-change-this'
+app.config['SECRET_KEY'] = 'your-secret-key-change-this-in-production'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///addtech.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JSON_SORT_KEYS'] = False
 
 # Initialize extensions
 db = SQLAlchemy(app)
@@ -24,6 +25,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    grade = db.Column(db.String(10), nullable=True)  # Class/Grade level
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Appointment(db.Model):
@@ -126,9 +128,15 @@ FOUNDERS = [
 # Routes
 @app.route('/')
 def index():
+    # Filter classes based on user's grade if logged in
+    user_classes = CLASSES
+    if current_user.is_authenticated and current_user.grade:
+        user_grade = int(current_user.grade)
+        user_classes = [c for c in CLASSES if c['id'] == user_grade]
+    
     return render_template('index.html', 
                          features=FEATURES,
-                         classes=CLASSES,
+                         classes=user_classes,
                          founders=FOUNDERS,
                          current_user=current_user)
 
@@ -137,7 +145,19 @@ def class_details(class_id):
     cls = next((c for c in CLASSES if c['id'] == class_id), None)
     if not cls:
         return redirect(url_for('index'))
-    return redirect(url_for('login'))
+    
+    # If not logged in, redirect to login
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
+    # Check if user's grade matches the selected class
+    user_grade = int(current_user.grade) if current_user.grade else None
+    
+    # If user tries to access a different class, redirect to their class
+    if user_grade and user_grade != class_id:
+        return redirect(url_for('class_details', class_id=user_grade))
+    
+    return redirect(url_for('dashboard'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -173,8 +193,9 @@ def register():
         email = data.get('email')
         password = data.get('password')
         confirm_password = data.get('confirm_password')
+        grade = data.get('grade')
         
-        if not username or not email or not password:
+        if not username or not email or not password or not grade:
             return jsonify({'success': False, 'error': 'All fields are required'})
         
         if password != confirm_password:
@@ -187,6 +208,7 @@ def register():
         user = User(
             username=username,
             email=email,
+            grade=grade,
             password=generate_password_hash(password)
         )
         db.session.add(user)
@@ -271,16 +293,21 @@ def view_subscribers():
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):
-    return render_template('404.html'), 404
+    return jsonify({'success': False, 'error': 'Page not found'}), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
-    return render_template('500.html'), 500
+    print(f"Server error: {error}")
+    return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({'success': False, 'error': 'Method not allowed'}), 405
 
 # Create database tables
 with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='127.0.0.1', port=5000)
