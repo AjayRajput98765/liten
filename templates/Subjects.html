@@ -7,466 +7,73 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        :root {
-            --primary: #4a6cf7;
-            --secondary: #6a11cb;
-            --maths: #ff6b6b;
-            --science: #4ecdc4;
-            --social: #96ceb4;
-            --english: #ffeaa7;
-            --hindi: #a29bfe;
-            --dark: #2c3e50;
-            --light: #f5f7fa;
-            --gray: #7f8c8d;
-        }
-
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: #333;
-            min-height: 100vh;
-        }
-
-        .navbar {
-            background-color: #fff !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 40px;
-        }
-
-        .navbar-logo {
-            height: 40px;
-            width: auto;
-        }
-
-        .nav-link {
-            color: #333 !important;
-            font-weight: 500;
-            margin: 0 10px;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--primary) !important;
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, #FE5D37, #FF8A6D);
-            color: white !important;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(254, 93, 55, 0.3);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo i {
-            font-size: 32px;
-            color: var(--primary);
-        }
-
-        .logo h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .user-class {
-            font-size: 14px;
-            color: var(--gray);
-        }
-
-        .dashboard-title {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 32px;
-            color: var(--dark);
-            position: relative;
-        }
-
-        .dashboard-title:after {
-            content: "";
-            display: block;
-            width: 200px;
-            height: 4px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            margin: 10px auto;
-            border-radius: 10px;
-        }
-
-        .subjects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .subject-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px 20px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 280px;
-        }
-
-        .subject-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .subject-icon {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 50px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .subject-card:hover .subject-icon {
-            transform: scale(1.1);
-        }
-
-        .subject-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .subject-teacher {
-            font-size: 16px;
-            color: var(--gray);
-            margin-bottom: 15px;
-        }
-
-        .subject-stats {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .stat {
-            text-align: center;
-            padding: 8px 12px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.7);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-value {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--gray);
-        }
-
-        .maths .subject-icon {
-            background: linear-gradient(135deg, var(--maths), #ff8e8e);
-        }
-
-        .science .subject-icon {
-            background: linear-gradient(135deg, var(--science), #44a08d);
-        }
-
-        .social-science .subject-icon {
-            background: linear-gradient(135deg, var(--social), #6abf8c);
-        }
-
-        .english .subject-icon {
-            background: linear-gradient(135deg, var(--english), #fdcb6e);
-        }
-
-        .hindi .subject-icon {
-            background: linear-gradient(135deg, var(--hindi), #6c5ce7);
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .floating {
-            animation: float 4s ease-in-out infinite;
-        }
-
-        .maths { animation-delay: 0s; }
-        .science { animation-delay: 0.5s; }
-        .social-science { animation-delay: 1s; }
-        .english { animation-delay: 1.5s; }
-        .hindi { animation-delay: 2s; }
-
-        .features-page {
-            display: none;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-
-        .page-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--light);
-        }
-
-        .back-button {
-            background: var(--light);
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: var(--dark);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .back-button:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        .page-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .page-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .feature-card {
-            background: var(--light);
-            border-radius: 15px;
-            padding: 25px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border-left: 5px solid var(--primary);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            gap: 15px;
-        }
-
-        .feature-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-        }
-
-        .feature-title {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .feature-description {
-            color: var(--gray);
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .progress-container {
-            margin-bottom: 15px;
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 1s ease-in-out;
-        }
-
-        .feature-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 8px 15px;
-            border-radius: 6px;
-            border: none;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            flex: 1;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #3a5ce5;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #ddd;
-            color: #555;
-        }
-
-        .btn-outline:hover {
-            background: #f8f9fa;
-        }
-
-        .video-lectures .feature-icon { background: #ff6b6b; }
-        .audio-books .feature-icon { background: #4ecdc4; }
-        .flashcards .feature-icon { background: #96ceb4; }
-        .smart-notes .feature-icon { background: #ffeaa7; color: #333; }
-        .important-questions .feature-icon { background: #a29bfe; }
-        .summaries .feature-icon { background: #fd79a8; }
-
-        @media (max-width: 768px) {
-            .subjects-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            
-            header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .subjects-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root { --primary:#4a6cf7; --secondary:#6a11cb; --maths:#ff6b6b; --science:#4ecdc4; --social:#96ceb4; --english:#ffeaa7; --hindi:#a29bfe; --dark:#2c3e50; --light:#f5f7fa; --gray:#7f8c8d; }
+        body { background: linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%); color:#333; min-height:100vh; }
+        .navbar { background-color:#fff !important; box-shadow:0 2px 8px rgba(0,0,0,0.08); margin-bottom:40px; }
+        .navbar-logo { height:40px; width:auto; }
+        .nav-link { color:#333 !important; font-weight:500; margin:0 10px; transition:color .3s; }
+        .nav-link:hover { color:var(--primary) !important; }
+        .logout-btn { background:linear-gradient(135deg,#FE5D37,#FF8A6D); color:#fff !important; border:none; padding:8px 20px; border-radius:20px; font-weight:600; }
+        .container { max-width:1200px; margin:0 auto; padding:20px; }
+        header { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; padding:20px; background:rgba(255,255,255,0.9); border-radius:20px; box-shadow:0 8px 16px rgba(0,0,0,0.1); }
+        .logo { display:flex; align-items:center; gap:15px; }
+        .logo i { font-size:32px; color:var(--primary); }
+        .logo h1 { font-size:24px; font-weight:700; color:var(--dark); }
+        .user-info { display:flex; align-items:center; gap:15px; }
+        .user-avatar { width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--secondary)); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:20px; box-shadow:0 4px 8px rgba(0,0,0,0.2); }
+        .user-name { font-weight:600; color:var(--dark); }
+        .user-class { font-size:14px; color:var(--gray); }
+        .dashboard-title { text-align:center; margin-bottom:40px; font-size:32px; color:var(--dark); position:relative; }
+        .dashboard-title:after { content:""; display:block; width:200px; height:4px; background:linear-gradient(to right,var(--primary),var(--secondary)); margin:10px auto; border-radius:10px; }
+        .subjects-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:30px; margin-bottom:40px; }
+        .subject-card { background:white; border-radius:20px; box-shadow:0 10px 20px rgba(0,0,0,0.1); padding:30px 20px; transition:all .3s; position:relative; overflow:hidden; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:280px; }
+        .subject-card:hover { transform:translateY(-10px); box-shadow:0 15px 30px rgba(0,0,0,0.15); }
+        .subject-icon { width:120px; height:120px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:50px; margin-bottom:20px; box-shadow:0 8px 16px rgba(0,0,0,0.2); transition:all .3s; }
+        .subject-card:hover .subject-icon { transform:scale(1.1); }
+        .subject-title { font-size:24px; font-weight:700; margin-bottom:10px; }
+        .subject-teacher { font-size:16px; color:var(--gray); margin-bottom:15px; }
+        .subject-stats { display:flex; justify-content:center; gap:15px; margin-top:15px; }
+        .stat { text-align:center; padding:8px 12px; border-radius:10px; background:rgba(255,255,255,0.7); box-shadow:0 3px 6px rgba(0,0,0,0.1); }
+        .stat-value { font-size:18px; font-weight:700; }
+        .stat-label { font-size:12px; color:var(--gray); }
+        .maths .subject-icon { background:linear-gradient(135deg,var(--maths),#ff8e8e); }
+        .science .subject-icon { background:linear-gradient(135deg,var(--science),#44a08d); }
+        .social-science .subject-icon { background:linear-gradient(135deg,var(--social),#6abf8c); }
+        .english .subject-icon { background:linear-gradient(135deg,var(--english),#fdcb6e); color:#333; }
+        .hindi .subject-icon { background:linear-gradient(135deg,var(--hindi),#6c5ce7); }
+        @keyframes float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)} }
+        .floating { animation:float 4s ease-in-out infinite; }
+        .features-page { display:none; background:white; border-radius:20px; padding:30px; box-shadow:0 10px 30px rgba(0,0,0,0.1); margin-top:20px; }
+        .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:30px; padding-bottom:15px; border-bottom:2px solid var(--light); }
+        .back-button { background:var(--light); border:none; border-radius:50%; width:50px; height:50px; display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--dark); cursor:pointer; transition:all .3s; }
+        .back-button:hover { background:var(--primary); color:white; }
+        .page-title { font-size:28px; font-weight:700; color:var(--dark); display:flex; align-items:center; gap:15px; }
+        .page-icon { width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; }
+        .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:25px; }
+        .feature-card { background:var(--light); border-radius:15px; padding:25px; transition:all .3s; cursor:default; border-left:5px solid var(--primary); max-height:600px; overflow:auto; }
+        .feature-header { display:flex; align-items:center; margin-bottom:15px; gap:15px; }
+        .feature-icon { width:50px; height:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:20px; }
+        .feature-title { font-size:20px; font-weight:600; }
+        .feature-description { color:var(--gray); margin-bottom:15px; line-height:1.5; }
+        .progress-container { margin-bottom:15px; }
+        .progress-label { display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px; }
+        .progress-bar { height:8px; background-color:#e9ecef; border-radius:4px; overflow:hidden; }
+        .progress-fill { height:100%; border-radius:4px; transition:width 1s ease-in-out; }
+        .feature-actions { display:flex; gap:10px; margin-top:12px; }
+        .btn { padding:8px 15px; border-radius:6px; border:none; font-size:14px; font-weight:500; cursor:pointer; transition:all .3s; flex:1; text-align:center; }
+        .btn-primary { background:var(--primary); color:white; }
+        .btn-outline { background:transparent; border:1px solid #ddd; color:#555; }
+        .video-lectures .feature-icon { background:#ff6b6b; }
+        .audio-books .feature-icon { background:#4ecdc4; }
+        .flashcards .feature-icon { background:#96ceb4; color:#fff; }
+        .smart-notes .feature-icon { background:#ffeaa7; color:#333; }
+        .content-list-item { padding:.5rem 0; border-bottom:1px dashed #eef; }
+        .content-link { color:var(--primary); text-decoration:none; display:block; }
+        .content-link:hover { text-decoration:underline; }
+        .highlight { box-shadow:0 0 0 4px rgba(74,108,247,0.08); border-left:5px solid rgba(74,108,247,0.25); }
+        @media (max-width:768px) { .subjects-grid { grid-template-columns:repeat(2,1fr); gap:20px; } header { flex-direction:column; gap:15px; text-align:center; } .features-grid { grid-template-columns:1fr; } }
+        @media (max-width:480px) { .subjects-grid { grid-template-columns:1fr; } }
     </style>
 </head>
 <body>
@@ -474,18 +81,17 @@
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container-fluid px-4 px-lg-5">
             <a href="{{ url_for('index') }}" class="navbar-brand d-flex align-items-center">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Addtech Logo" class="navbar-logo me-2">
-                <span style="color: #333; font-weight: 700;">Addtech</span>
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Addtech Logo" class="navbar-logo me-2" onerror="this.style.display='none'">
+                <span style="color:#333; font-weight:700;">Addtech</span>
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a href="{{ url_for('dashboard') }}" class="nav-link active">Dashboard</a></li>
                     <li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
+                    {% if current_user.is_authenticated and current_user.username == 'admin' %}
+                        <li class="nav-item"><a href="{{ url_for('admin_panel') }}" class="nav-link">Admin</a></li>
+                    {% endif %}
                     <li class="nav-item">
                         <a href="{{ url_for('logout') }}" class="nav-link logout-btn">Logout</a>
                     </li>
@@ -501,10 +107,10 @@
                 <h1>My Learning</h1>
             </div>
             <div class="user-info">
-                <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
+                <div class="user-avatar">{{ (current_user.username[:1]|upper) if current_user.is_authenticated else 'U' }}</div>
                 <div>
                     <div class="user-name">{{ current_user.username }}</div>
-                    <div class="user-class">Class {{ current_user.grade if current_user.grade else '8' }}</div>
+                    <div class="user-class">Class {{ current_user.grade if current_user.grade else 'N/A' }}</div>
                 </div>
             </div>
         </header>
@@ -609,202 +215,322 @@
         </div>
 
         <!-- Features Page -->
-        <div class="features-page" id="featuresPage">
+        <div class="features-page" id="featuresPage" aria-hidden="true">
             <div class="page-header">
-                <button class="back-button" id="backButton">
+                <button class="back-button" id="backButton" aria-label="Back">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <div class="page-title">
                     <div class="page-icon" id="pageIcon"></div>
-                    <span id="pageTitle">Mathematics</span>
+                    <span id="pageTitle">Subject</span>
                 </div>
                 <div></div>
             </div>
 
-            <div class="features-grid">
-                <div class="feature-card video-lectures">
+            <div class="small-muted mb-3">Available content: {{ contents|length }}</div>
+
+            <div class="features-grid" id="featuresGrid">
+                <!-- Video Lectures -->
+                <div class="feature-card video-lectures" id="feature-video">
                     <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-play-circle"></i>
-                        </div>
+                        <div class="feature-icon"><i class="fas fa-play-circle"></i></div>
                         <h3 class="feature-title">Video Lectures</h3>
                     </div>
                     <p class="feature-description">Watch engaging video lessons from expert teachers to understand complex concepts easily.</p>
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Progress</span>
-                            <span>65%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 65%; background: #ff6b6b;"></div>
-                        </div>
+
+                    <div class="mt-3">
+                        {% set found_videos = false %}
+                        {% for c in contents %}
+                            {% if c.type == 'video' and (not c.grade or (current_user.is_authenticated and (c.grade ~ '') == (current_user.grade ~ ''))) %}
+                                <div class="content-list-item" data-subject="{{ c.subject or '' }}">
+                                    <a class="content-link media-link"
+                                       href="{{ url_for('uploaded_file', filename=c.filename) }}"
+                                       data-type="{{ c.type }}"
+                                       data-title="{{ c.title|e }}"
+                                       data-src="{{ url_for('uploaded_file', filename=c.filename) }}"
+                                       data-ext="{{ c.filename.rsplit('.',1)[1] }}">
+                                        <i class="fa-solid fa-video me-2"></i> {{ c.title }}
+                                        {% if c.subject %}<small class="small-muted"> — {{ c.subject }}</small>{% endif %}
+                                    </a>
+                                    {% if c.description %}<div class="small-muted">{{ c.description }}</div>{% endif %}
+                                    <div class="small-muted">{{ c.uploaded_at.strftime('%Y-%m-%d') }}</div>
+                                </div>
+                                {% set found_videos = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if not found_videos %}
+                            <div class="small-muted">No videos available for your grade yet.</div>
+                        {% endif %}
                     </div>
+
                     <div class="feature-actions">
-                        <button class="btn btn-primary">Watch Now</button>
-                        <button class="btn btn-outline">View All</button>
+                        <button class="btn btn-primary open-feature" data-feature="video">Browse Videos</button>
+                        <a class="btn btn-outline" href="#feature-video">All Videos</a>
                     </div>
                 </div>
 
-                <div class="feature-card audio-books">
+                <!-- Audio Books -->
+                <div class="feature-card audio-books" id="feature-audio">
                     <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-headphones"></i>
-                        </div>
+                        <div class="feature-icon"><i class="fas fa-headphones"></i></div>
                         <h3 class="feature-title">Audio Books</h3>
                     </div>
                     <p class="feature-description">Listen to textbook content and stories anytime, anywhere to reinforce learning.</p>
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Progress</span>
-                            <span>40%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 40%; background: #4ecdc4;"></div>
-                        </div>
+
+                    <div class="mt-3">
+                        {% set found_audio = false %}
+                        {% for c in contents %}
+                            {% if c.type == 'audio' and (not c.grade or (current_user.is_authenticated and (c.grade ~ '') == (current_user.grade ~ ''))) %}
+                                <div class="content-list-item" data-subject="{{ c.subject or '' }}">
+                                    <a class="content-link media-link"
+                                       href="{{ url_for('uploaded_file', filename=c.filename) }}"
+                                       data-type="{{ c.type }}"
+                                       data-title="{{ c.title|e }}"
+                                       data-src="{{ url_for('uploaded_file', filename=c.filename) }}">
+                                        <i class="fa-solid fa-audio-description me-2"></i> {{ c.title }}
+                                        {% if c.subject %}<small class="small-muted"> — {{ c.subject }}</small>{% endif %}
+                                    </a>
+                                    {% if c.description %}<div class="small-muted">{{ c.description }}</div>{% endif %}
+                                    <div class="small-muted">{{ c.uploaded_at.strftime('%Y-%m-%d') }}</div>
+                                </div>
+                                {% set found_audio = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if not found_audio %}
+                            <div class="small-muted">No audio books available yet.</div>
+                        {% endif %}
                     </div>
+
                     <div class="feature-actions">
-                        <button class="btn btn-primary">Listen Now</button>
-                        <button class="btn btn-outline">Browse Library</button>
+                        <button class="btn btn-primary open-feature" data-feature="audio">Browse Audio</button>
+                        <a class="btn btn-outline" href="#feature-audio">All Audio</a>
                     </div>
                 </div>
 
-                <div class="feature-card flashcards">
+                <!-- Flashcards -->
+                <div class="feature-card flashcards" id="feature-flashcards">
                     <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-layer-group"></i>
-                        </div>
+                        <div class="feature-icon"><i class="fas fa-layer-group"></i></div>
                         <h3 class="feature-title">Flashcards</h3>
                     </div>
                     <p class="feature-description">Master key concepts and definitions with interactive digital flashcards for quick revision.</p>
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Progress</span>
-                            <span>75%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 75%; background: #96ceb4;"></div>
-                        </div>
+
+                    <div class="mt-3">
+                        {% set found_flash = false %}
+                        {% for c in contents %}
+                            {% if c.type == 'flashcards' and (not c.grade or (current_user.is_authenticated and (c.grade ~ '') == (current_user.grade ~ ''))) %}
+                                <div class="content-list-item" data-subject="{{ c.subject or '' }}">
+                                    <a class="content-link" href="{{ url_for('uploaded_file', filename=c.filename) }}" target="_blank">
+                                        <i class="fa-solid fa-clone me-2"></i> {{ c.title }}
+                                        {% if c.subject %}<small class="small-muted"> — {{ c.subject }}</small>{% endif %}
+                                    </a>
+                                    {% if c.description %}<div class="small-muted">{{ c.description }}</div>{% endif %}
+                                    <div class="small-muted">{{ c.uploaded_at.strftime('%Y-%m-%d') }}</div>
+                                </div>
+                                {% set found_flash = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if not found_flash %}
+                            <div class="small-muted">No flashcards uploaded yet.</div>
+                        {% endif %}
                     </div>
+
                     <div class="feature-actions">
-                        <button class="btn btn-primary">Study Now</button>
-                        <button class="btn btn-outline">Create New</button>
+                        <button class="btn btn-primary open-feature" data-feature="flashcards">Practice</button>
+                        <a class="btn btn-outline" href="#feature-flashcards">All Flashcards</a>
                     </div>
                 </div>
 
-                <div class="feature-card smart-notes">
+                <!-- Smart Notes -->
+                <div class="feature-card smart-notes" id="feature-notes">
                     <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-sticky-note"></i>
-                        </div>
+                        <div class="feature-icon"><i class="fas fa-sticky-note"></i></div>
                         <h3 class="feature-title">Smart Notes</h3>
                     </div>
                     <p class="feature-description">Access well-organized notes with highlights, diagrams, and key points for each chapter.</p>
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Progress</span>
-                            <span>55%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 55%; background: #ffeaa7;"></div>
-                        </div>
-                    </div>
-                    <div class="feature-actions">
-                        <button class="btn btn-primary">Read Notes</button>
-                        <button class="btn btn-outline">Download</button>
-                    </div>
-                </div>
 
-                <div class="feature-card important-questions">
-                    <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-question-circle"></i>
-                        </div>
-                        <h3 class="feature-title">Important Questions</h3>
+                    <div class="mt-3">
+                        {% set found_notes = false %}
+                        {% for c in contents %}
+                            {% if c.type == 'notes' and (not c.grade or (current_user.is_authenticated and (c.grade ~ '') == (current_user.grade ~ ''))) %}
+                                <div class="content-list-item" data-subject="{{ c.subject or '' }}">
+                                    <a class="content-link" href="{{ url_for('uploaded_file', filename=c.filename) }}" target="_blank">
+                                        <i class="fa-solid fa-file-pdf me-2"></i> {{ c.title }}
+                                        {% if c.subject %}<small class="small-muted"> — {{ c.subject }}</small>{% endif %}
+                                    </a>
+                                    {% if c.description %}<div class="small-muted">{{ c.description }}</div>{% endif %}
+                                    <div class="small-muted">{{ c.uploaded_at.strftime('%Y-%m-%d') }}</div>
+                                </div>
+                                {% set found_notes = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if not found_notes %}
+                            <div class="small-muted">No notes uploaded yet.</div>
+                        {% endif %}
                     </div>
-                    <p class="feature-description">Practice with curated important questions and previous year papers for exam preparation.</p>
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Progress</span>
-                            <span>30%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 30%; background: #a29bfe;"></div>
-                        </div>
-                    </div>
-                    <div class="feature-actions">
-                        <button class="btn btn-primary">Practice Now</button>
-                        <button class="btn btn-outline">View All</button>
-                    </div>
-                </div>
 
-                <div class="feature-card summaries">
-                    <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <h3 class="feature-title">Chapter Summaries</h3>
-                    </div>
-                    <p class="feature-description">Quickly revise with concise chapter summaries that highlight all key concepts and points.</p>
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Progress</span>
-                            <span>80%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 80%; background: #fd79a8;"></div>
-                        </div>
-                    </div>
                     <div class="feature-actions">
-                        <button class="btn btn-primary">Read Summary</button>
-                        <button class="btn btn-outline">All Chapters</button>
+                        <button class="btn btn-primary open-feature" data-feature="notes">Open Notes</button>
+                        <a class="btn btn-outline" href="#feature-notes">Download All</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Media Modal -->
+    <div class="modal fade" id="mediaModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="mediaModalTitle">Media</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="mediaContainer" style="min-height:240px; display:flex; align-items:center; justify-content:center;">
+              <!-- video or audio element injected here -->
+            </div>
+            <div class="small-muted mt-2" id="mediaDescription"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.0/js/bootstrap.bundle.min.js"></script>
     <script>
-        const subjects = {
-            maths: { title: "Mathematics", icon: "fas fa-calculator", color: "maths" },
-            science: { title: "Science", icon: "fas fa-flask", color: "science" },
-            "social-science": { title: "Social Science", icon: "fas fa-globe-asia", color: "social-science" },
-            english: { title: "English", icon: "fas fa-book-open", color: "english" },
-            hindi: { title: "Hindi", icon: "fas fa-language", color: "hindi" }
-        };
+        document.addEventListener('DOMContentLoaded', function () {
+            const subjects = {
+                maths: { title: "Mathematics", icon: "fas fa-calculator", color: "maths" },
+                science: { title: "Science", icon: "fas fa-flask", color: "science" },
+                "social-science": { title: "Social Science", icon: "fas fa-globe-asia", color: "social-science" },
+                english: { title: "English", icon: "fas fa-book-open", color: "english" },
+                hindi: { title: "Hindi", icon: "fas fa-language", color: "hindi" }
+            };
 
-        const subjectsGrid = document.getElementById('subjectsGrid');
-        const featuresPage = document.getElementById('featuresPage');
-        const backButton = document.getElementById('backButton');
-        const pageTitle = document.getElementById('pageTitle');
-        const pageIcon = document.getElementById('pageIcon');
+            const subjectsGrid = document.getElementById('subjectsGrid');
+            const featuresPage = document.getElementById('featuresPage');
+            const backButton = document.getElementById('backButton');
+            const pageTitle = document.getElementById('pageTitle');
+            const pageIcon = document.getElementById('pageIcon');
+            const mediaModal = new bootstrap.Modal(document.getElementById('mediaModal'), { keyboard: true });
 
-        document.querySelectorAll('.subject-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const subject = this.getAttribute('data-subject');
-                openFeaturesPage(subject);
+            document.querySelectorAll('.subject-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const subject = this.getAttribute('data-subject');
+                    openFeaturesPage(subject);
+                });
             });
-        });
 
-        function openFeaturesPage(subjectKey) {
-            const subject = subjects[subjectKey];
-            pageTitle.textContent = subject.title;
-            pageIcon.className = `page-icon ${subject.color}`;
-            pageIcon.innerHTML = `<i class="${subject.icon}"></i>`;
-            subjectsGrid.style.display = 'none';
-            featuresPage.style.display = 'block';
-        }
+            function filterContentBySubject(subjectKey) {
+                // subjectKey: e.g. 'maths','science' ; blank/'' means general (uploaded without subject)
+                // Show items that either have no subject (general) OR match the selected subject.
+                document.querySelectorAll('.feature-card').forEach(card => {
+                    card.querySelectorAll('.content-list-item').forEach(item => {
+                        const itemSubj = (item.getAttribute('data-subject') || '').trim();
+                        // if no subject assigned -> treat as general (show for all subjects)
+                        const show = (!itemSubj) || (subjectKey && itemSubj === subjectKey);
+                        item.style.display = show ? '' : 'none';
+                    });
+                });
+            }
 
-        backButton.addEventListener('click', function() {
-            featuresPage.style.display = 'none';
-            subjectsGrid.style.display = 'grid';
-        });
+            function openFeaturesPage(subjectKey) {
+                const subject = subjects[subjectKey] || { title: subjectKey || 'Subject', icon: '', color: '' };
+                pageTitle.textContent = subject.title;
+                pageIcon.className = `page-icon ${subject.color}`;
+                pageIcon.innerHTML = subject.icon ? `<i class="${subject.icon}"></i>` : '';
+                subjectsGrid.style.display = 'none';
+                featuresPage.style.display = 'block';
+                featuresPage.setAttribute('aria-hidden', 'false');
+                // filter content to selected subject
+                filterContentBySubject(subjectKey);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
 
-        document.querySelectorAll('.btn-primary').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const featureName = this.closest('.feature-card').querySelector('.feature-title').textContent;
-                alert(`Opening ${featureName} for ${pageTitle.textContent}`);
+            backButton.addEventListener('click', function() {
+                featuresPage.style.display = 'none';
+                featuresPage.setAttribute('aria-hidden', 'true');
+                subjectsGrid.style.display = 'grid';
+                document.querySelectorAll('.feature-card').forEach(f => f.classList.remove('highlight'));
+                // show all content again
+                filterContentBySubject(null);
+            });
+
+            // Open specific feature panel from feature action buttons
+            document.querySelectorAll('.open-feature').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const feature = this.getAttribute('data-feature'); // video, audio, flashcards, notes
+                    if (subjectsGrid.style.display !== 'none') {
+                        // open features page without selecting a subject (shows general + all)
+                        openFeaturesPage(''); // pass empty to treat as "General" view
+                    }
+                    const el = document.getElementById('feature-' + feature);
+                    if (el) {
+                        document.querySelectorAll('.feature-card').forEach(f => f.classList.remove('highlight'));
+                        el.classList.add('highlight');
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            // Media links
+            function attachMediaLinks() {
+                document.querySelectorAll('.media-link').forEach(link => {
+                    link.removeEventListener('click', link._mediaClickHandler);
+                    const handler = function(e) {
+                        const type = this.dataset.type;
+                        const src = this.dataset.src;
+                        const title = this.dataset.title || '';
+                        e.preventDefault();
+                        openMedia(type, src, title);
+                    };
+                    link.addEventListener('click', handler);
+                    link._mediaClickHandler = handler;
+                });
+            }
+
+            attachMediaLinks();
+
+            function openMedia(type, src, title) {
+                const container = document.getElementById('mediaContainer');
+                const modalTitle = document.getElementById('mediaModalTitle');
+                const mediaDesc = document.getElementById('mediaDescription');
+                container.innerHTML = '';
+                mediaDesc.textContent = '';
+                modalTitle.textContent = title || 'Media';
+
+                if (type === 'video') {
+                    const video = document.createElement('video');
+                    video.controls = true;
+                    video.style.maxWidth = '100%';
+                    video.style.width = '100%';
+                    video.src = src;
+                    video.setAttribute('playsinline', '');
+                    container.appendChild(video);
+                    video.play().catch(()=>{});
+                } else if (type === 'audio') {
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = src;
+                    audio.style.width = '100%';
+                    container.appendChild(audio);
+                    audio.play().catch(()=>{});
+                } else {
+                    window.open(src, '_blank');
+                    return;
+                }
+
+                mediaModal.show();
+            }
+
+            document.getElementById('mediaModal').addEventListener('hidden.bs.modal', function () {
+                const container = document.getElementById('mediaContainer');
+                const players = container.querySelectorAll('video, audio');
+                players.forEach(p => {
+                    try { p.pause(); p.src = ''; } catch (e) {}
+                });
+                container.innerHTML = '';
+                document.getElementById('mediaDescription').textContent = '';
             });
         });
     </script>
