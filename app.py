@@ -4,6 +4,8 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from sqlalchemy import func
+from flask import abort
 import os
 import sys
 import getpass
@@ -363,6 +365,8 @@ def delete_subscriber(subscriber_id):
     db.session.commit()
     return redirect(url_for('admin_panel'))
 
+# ...existing code...
+
 @app.route('/upload_content', methods=['POST'])
 @login_required
 def upload_content():
@@ -385,7 +389,9 @@ def upload_content():
     saved_name = f"{timestamp}_{filename}"
     save_path = os.path.join(target_folder, saved_name)
     file.save(save_path)
-    rel_path = os.path.join(content_type, saved_name)
+
+    # store forward-slash path for URLs (cross-platform)
+    rel_path = f"{content_type}/{saved_name}"
     content = Content(type=content_type, title=title, filename=rel_path, description=description, grade=grade, subject=subject)
     db.session.add(content)
     db.session.commit()
@@ -393,8 +399,48 @@ def upload_content():
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
-    uploads_root = app.config['UPLOAD_FOLDER']
-    return send_from_directory(uploads_root, filename)
+    # normalize filename coming from URL: convert any backslashes, trim leading slashes
+    safe_rel = filename.replace('\\', '/').lstrip('/')
+    uploads_root = os.path.abspath(app.config['UPLOAD_FOLDER'])
+    full_path = os.path.abspath(os.path.join(uploads_root, safe_rel))
+
+    # Prevent directory traversal: full_path must be inside uploads_root
+    if not (full_path == uploads_root or full_path.startswith(uploads_root + os.sep)):
+        abort(404)
+
+    if not os.path.exists(full_path):
+        abort(404)
+
+    directory, fname = os.path.split(full_path)
+    return send_from_directory(directory, fname)
+
+@app.route('/delete_content/<int:content_id>', methods=['POST'])
+@login_required
+def delete_content(content_id):
+    if current_user.username != 'admin':
+        return redirect(url_for('dashboard'))
+    content = Content.query.get_or_404(content_id)
+    try:
+        # normalize stored filename and build platform-safe path
+        safe_rel = (content.filename or '').replace('\\', '/').lstrip('/')
+        file_path = os.path.abspath(os.path.join(app.config['UPLOAD_FOLDER'], safe_rel))
+        uploads_root = os.path.abspath(app.config['UPLOAD_FOLDER'])
+        if file_path.startswith(uploads_root):
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                parent_dir = os.path.dirname(file_path)
+                try:
+                    if os.path.isdir(parent_dir) and not os.listdir(parent_dir):
+                        os.rmdir(parent_dir)
+                except Exception:
+                    pass
+    except Exception as e:
+        print(f"Failed to delete file {content.filename}: {e}")
+    db.session.delete(content)
+    db.session.commit()
+    return redirect(url_for('admin_panel'))
+
+# ...existing code...
 
 @app.route('/admin/appointments')
 @login_required
@@ -412,27 +458,36 @@ def view_subscribers():
     subscribers = NewsletterSubscriber.query.order_by(NewsletterSubscriber.subscribed_at.desc()).all()
     return render_template('admin_subscribers.html', subscribers=subscribers)
 
-@app.route('/delete_content/<int:content_id>', methods=['POST'])
+
+@app.route('/browse/<feature>')
 @login_required
-def delete_content(content_id):
-    if current_user.username != 'admin':
+def browse_feature(feature):
+    feature = (feature or '').lower()
+    allowed = {'video', 'audio', 'notes', 'flashcards'}
+    if feature not in allowed:
         return redirect(url_for('dashboard'))
-    content = Content.query.get_or_404(content_id)
-    try:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], content.filename)
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            parent_dir = os.path.dirname(file_path)
-            try:
-                if os.path.isdir(parent_dir) and not os.listdir(parent_dir):
-                    os.rmdir(parent_dir)
-            except Exception:
-                pass
-    except Exception as e:
-        print(f"Failed to delete file {content.filename}: {e}")
-    db.session.delete(content)
-    db.session.commit()
-    return redirect(url_for('admin_panel'))
+
+    subject = request.args.get('subject')
+    user_grade = current_user.grade if getattr(current_user, 'grade', None) else None
+
+    q = Content.query.filter_by(type=feature)
+    if user_grade:
+        q = q.filter((Content.grade == None) | (Content.grade == str(user_grade)))
+
+    if subject:
+        # normalize incoming subject and DB subject: lower-case, convert hyphens/underscores to spaces
+        subj_norm = subject.replace('-', ' ').replace('_', ' ').strip().lower()
+        db_subject_normalized = func.lower(
+            func.replace(
+                func.replace(func.coalesce(Content.subject, ''), '-', ' '),
+                '_', ' '
+            )
+        )
+        q = q.filter(db_subject_normalized == subj_norm)
+
+    contents = q.order_by(Content.uploaded_at.desc()).all()
+    return render_template('browse.html', contents=contents, feature=feature, subject=subject, current_user=current_user)
+# ...existing code...
 
 @app.route('/dev-login')
 def dev_login():

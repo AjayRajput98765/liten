@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Browse — {{ feature|capitalize if feature else 'Content' }}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+  <style>
+    body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#f6f8ff;color:#111;padding:22px}
+    .container{max-width:1000px;margin:0 auto}
+    .card{background:#fff;padding:18px;border-radius:10px;box-shadow:0 8px 24px rgba(15,25,65,0.06);margin-bottom:12px;display:flex;gap:12px;align-items:center}
+    .media-icon{width:64px;height:64px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
+    .media-icon.video{background:linear-gradient(135deg,#ff7a7a,#ffb199)}
+    .media-icon.audio{background:linear-gradient(135deg,#4ecdc4,#2fb9a7)}
+    .media-icon.notes{background:linear-gradient(135deg,#ffd06a,#ffe27a);color:#222}
+    .meta{flex:1;min-width:0}
+    .title{font-weight:700;font-size:16px}
+    .desc{color:#6b7280;font-size:13px;margin-top:4px}
+    .actions{display:flex;gap:8px}
+    .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn-primary{background:#4466ff;color:#fff}
+    .btn-outline{background:#fff;border:1px solid #e6eefc;color:#333}
+    .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+    a.back{color:#4466ff;text-decoration:none}
+    .empty{color:#657085;padding:18px;text-align:center;background:#fff;border-radius:10px}
+    small.muted{color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="toolbar">
+      <div>
+        <a class="back" href="{{ url_for('dashboard') }}">&larr; Back to Dashboard</a>
+        {% if subject %}<span style="margin-left:12px;color:#374151"> / Subject: <strong>{{ subject }}</strong></span>{% endif %}
+      </div>
+      <div><strong>{{ feature|capitalize if feature else 'All' }}</strong> — {{ contents|length }} item(s)</div>
+    </div>
+
+    {% if contents %}
+      {% for c in contents %}
+        <div class="card" role="listitem">
+          <div class="media-icon {% if c.type=='video' %}video{% elif c.type=='audio' %}audio{% else %}notes{% endif %}">
+            {% if c.type=='video' %}<i class="fa-solid fa-video"></i>{% elif c.type=='audio' %}<i class="fa-solid fa-headphones"></i>{% else %}<i class="fa-solid fa-file-pdf"></i>{% endif %}
+          </div>
+
+          <div class="meta">
+            <div class="title">{{ c.title }}</div>
+            <div class="desc">
+              {% if c.description %}{{ c.description }} • {% endif %}
+              Uploaded: {{ c.uploaded_at.strftime('%Y-%m-%d') }}{% if c.grade %} • Class {{ c.grade }}{% endif %}{% if c.subject %} • {{ c.subject }}{% endif %}
+            </div>
+          </div>
+
+          <div class="actions">
+            {% if c.type in ['video','audio'] %}
+              <a class="btn btn-primary" href="{{ url_for('uploaded_file', filename=c.filename) }}" target="_blank" rel="noopener"><i class="fa-solid fa-play"></i> Play</a>
+            {% else %}
+              <a class="btn btn-primary" href="{{ url_for('uploaded_file', filename=c.filename) }}" target="_blank" rel="noopener"><i class="fa-solid fa-eye"></i> View</a>
+            {% endif %}
+            <a class="btn btn-outline" href="{{ url_for('uploaded_file', filename=c.filename) }}" download><i class="fa-solid fa-download"></i> Download</a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty">No {{ feature }} items found{{ ' for subject ' + subject if subject }}.</div>
+    {% endif %}
+  </div>
+</body>
+</html>

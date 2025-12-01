@@ -1,3 +1,4 @@
+<!-- ...existing code... -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,7 +28,7 @@
         .dashboard-title { text-align:center; margin-bottom:40px; font-size:32px; color:var(--dark); position:relative; }
         .dashboard-title:after { content:""; display:block; width:200px; height:4px; background:linear-gradient(to right,var(--primary),var(--secondary)); margin:10px auto; border-radius:10px; }
         .subjects-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:30px; margin-bottom:40px; }
-        .subject-card { background:white; border-radius:20px; box-shadow:0 10px 20px rgba(0,0,0,0.1); padding:30px 20px; transition:all .3s; position:relative; overflow:hidden; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:280px; }
+        .subject-card { background:white; border-radius:20px; box-shadow:0 10px 20px rgba(0,0,0,0.1); padding:30px 20px; transition:all .3s; position:relative; overflow:hidden; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:320px; }
         .subject-card:hover { transform:translateY(-10px); box-shadow:0 15px 30px rgba(0,0,0,0.15); }
         .subject-icon { width:120px; height:120px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:50px; margin-bottom:20px; box-shadow:0 8px 16px rgba(0,0,0,0.2); transition:all .3s; }
         .subject-card:hover .subject-icon { transform:scale(1.1); }
@@ -42,6 +43,8 @@
         .social-science .subject-icon { background:linear-gradient(135deg,var(--social),#6abf8c); }
         .english .subject-icon { background:linear-gradient(135deg,var(--english),#fdcb6e); color:#333; }
         .hindi .subject-icon { background:linear-gradient(135deg,var(--hindi),#6c5ce7); }
+        .subject-actions { display:flex; gap:10px; margin-top:18px; width:100%; justify-content:center; }
+        .subject-actions a.btn { flex:0 0 auto; }
         @keyframes float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)} }
         .floating { animation:float 4s ease-in-out infinite; }
         .features-page { display:none; background:white; border-radius:20px; padding:30px; box-shadow:0 10px 30px rgba(0,0,0,0.1); margin-top:20px; }
@@ -135,6 +138,10 @@
                         <div class="stat-label">Quizzes</div>
                     </div>
                 </div>
+                <div class="subject-actions">
+                    <a class="btn btn-primary" href="{{ url_for('browse_feature', feature='audio', subject='maths') }}"><i class="fas fa-headphones me-1"></i> Browse Audio</a>
+                    <a class="btn btn-outline" href="{{ url_for('browse_feature', feature='video', subject='maths') }}"><i class="fas fa-video me-1"></i> Browse Videos</a>
+                </div>
             </div>
 
             <!-- Science Card -->
@@ -153,6 +160,10 @@
                         <div class="stat-value">6</div>
                         <div class="stat-label">Labs</div>
                     </div>
+                </div>
+                <div class="subject-actions">
+                    <a class="btn btn-primary" href="{{ url_for('browse_feature', feature='audio', subject='science') }}"><i class="fas fa-headphones me-1"></i> Browse Audio</a>
+                    <a class="btn btn-outline" href="{{ url_for('browse_feature', feature='video', subject='science') }}"><i class="fas fa-video me-1"></i> Browse Videos</a>
                 </div>
             </div>
 
@@ -173,6 +184,10 @@
                         <div class="stat-label">Projects</div>
                     </div>
                 </div>
+                <div class="subject-actions">
+                    <a class="btn btn-primary" href="{{ url_for('browse_feature', feature='notes', subject='social-science') }}"><i class="fas fa-file-pdf me-1"></i> Browse Notes</a>
+                    <a class="btn btn-outline" href="{{ url_for('browse_feature', feature='flashcards', subject='social-science') }}"><i class="fas fa-clone me-1"></i> Flashcards</a>
+                </div>
             </div>
 
             <!-- English Card -->
@@ -192,6 +207,10 @@
                         <div class="stat-label">Readings</div>
                     </div>
                 </div>
+                <div class="subject-actions">
+                    <a class="btn btn-primary" href="{{ url_for('browse_feature', feature='audio', subject='english') }}"><i class="fas fa-headphones me-1"></i> Browse Audio</a>
+                    <a class="btn btn-outline" href="{{ url_for('browse_feature', feature='notes', subject='english') }}"><i class="fas fa-file-pdf me-1"></i> Notes</a>
+                </div>
             </div>
 
             <!-- Hindi Card -->
@@ -200,21 +219,10 @@
                     <i class="fas fa-language"></i>
                 </div>
                 <h3 class="subject-title">Hindi</h3>
-                <p class="subject-teacher">Mr. Vikram Joshi</p>
-                <div class="subject-stats">
-                    <div class="stat">
-                        <div class="stat-value">10</div>
-                        <div class="stat-label">Lessons</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">4</div>
-                        <div class="stat-label">Stories</div>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Features Page -->
+        <!-- Features Page (kept for in-page browsing fallback) -->
         <div class="features-page" id="featuresPage" aria-hidden="true">
             <div class="page-header">
                 <button class="back-button" id="backButton" aria-label="Back">
@@ -264,7 +272,8 @@
                     </div>
 
                     <div class="feature-actions">
-                        <button class="btn btn-primary open-feature" data-feature="video">Browse Videos</button>
+                        <!-- changed to server-side browse page -->
+                        <a class="btn btn-primary" href="{{ url_for('browse_feature', feature='video') }}">Browse Videos</a>
                         <a class="btn btn-outline" href="#feature-video">All Videos</a>
                     </div>
                 </div>
@@ -302,7 +311,8 @@
                     </div>
 
                     <div class="feature-actions">
-                        <button class="btn btn-primary open-feature" data-feature="audio">Browse Audio</button>
+                        <!-- changed to server-side browse page -->
+                        <a class="btn btn-primary" href="{{ url_for('browse_feature', feature='audio') }}">Browse Audio</a>
                         <a class="btn btn-outline" href="#feature-audio">All Audio</a>
                     </div>
                 </div>
@@ -336,7 +346,7 @@
                     </div>
 
                     <div class="feature-actions">
-                        <button class="btn btn-primary open-feature" data-feature="flashcards">Practice</button>
+                        <a class="btn btn-primary" href="{{ url_for('browse_feature', feature='flashcards') }}">Practice</a>
                         <a class="btn btn-outline" href="#feature-flashcards">All Flashcards</a>
                     </div>
                 </div>
@@ -370,7 +380,7 @@
                     </div>
 
                     <div class="feature-actions">
-                        <button class="btn btn-primary open-feature" data-feature="notes">Open Notes</button>
+                        <a class="btn btn-primary" href="{{ url_for('browse_feature', feature='notes') }}">Open Notes</a>
                         <a class="btn btn-outline" href="#feature-notes">Download All</a>
                     </div>
                 </div>
@@ -412,84 +422,32 @@
             const backButton = document.getElementById('backButton');
             const pageTitle = document.getElementById('pageTitle');
             const pageIcon = document.getElementById('pageIcon');
-            const mediaModal = new bootstrap.Modal(document.getElementById('mediaModal'), { keyboard: true });
+            const mediaModalEl = document.getElementById('mediaModal');
+            const mediaModal = new bootstrap.Modal(mediaModalEl, { keyboard: true });
 
             document.querySelectorAll('.subject-card').forEach(card => {
-                card.addEventListener('click', function() {
+                card.addEventListener('click', function(e) {
+                    // if user clicked a direct browse link, let it navigate
+                    if (e.target.closest('a')) return;
                     const subject = this.getAttribute('data-subject');
                     openFeaturesPage(subject);
                 });
             });
 
-            function filterContentBySubject(subjectKey) {
-                // subjectKey: e.g. 'maths','science' ; blank/'' means general (uploaded without subject)
-                // Show items that either have no subject (general) OR match the selected subject.
-                document.querySelectorAll('.feature-card').forEach(card => {
-                    card.querySelectorAll('.content-list-item').forEach(item => {
-                        const itemSubj = (item.getAttribute('data-subject') || '').trim();
-                        // if no subject assigned -> treat as general (show for all subjects)
-                        const show = (!itemSubj) || (subjectKey && itemSubj === subjectKey);
-                        item.style.display = show ? '' : 'none';
-                    });
-                });
-            }
-
-            function openFeaturesPage(subjectKey) {
-                const subject = subjects[subjectKey] || { title: subjectKey || 'Subject', icon: '', color: '' };
-                pageTitle.textContent = subject.title;
-                pageIcon.className = `page-icon ${subject.color}`;
-                pageIcon.innerHTML = subject.icon ? `<i class="${subject.icon}"></i>` : '';
-                subjectsGrid.style.display = 'none';
-                featuresPage.style.display = 'block';
-                featuresPage.setAttribute('aria-hidden', 'false');
-                // filter content to selected subject
-                filterContentBySubject(subjectKey);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            backButton.addEventListener('click', function() {
-                featuresPage.style.display = 'none';
-                featuresPage.setAttribute('aria-hidden', 'true');
-                subjectsGrid.style.display = 'grid';
-                document.querySelectorAll('.feature-card').forEach(f => f.classList.remove('highlight'));
-                // show all content again
-                filterContentBySubject(null);
-            });
-
-            // Open specific feature panel from feature action buttons
-            document.querySelectorAll('.open-feature').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    const feature = this.getAttribute('data-feature'); // video, audio, flashcards, notes
-                    if (subjectsGrid.style.display !== 'none') {
-                        // open features page without selecting a subject (shows general + all)
-                        openFeaturesPage(''); // pass empty to treat as "General" view
-                    }
-                    const el = document.getElementById('feature-' + feature);
-                    if (el) {
-                        document.querySelectorAll('.feature-card').forEach(f => f.classList.remove('highlight'));
-                        el.classList.add('highlight');
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                });
-            });
-
-            // Media links
-            function attachMediaLinks() {
-                document.querySelectorAll('.media-link').forEach(link => {
-                    link.removeEventListener('click', link._mediaClickHandler);
+            function attachMediaLinks(root=document) {
+                root.querySelectorAll('.media-link').forEach(link => {
+                    if (link._mediaClickHandler) link.removeEventListener('click', link._mediaClickHandler);
                     const handler = function(e) {
+                        e.preventDefault();
                         const type = this.dataset.type;
                         const src = this.dataset.src;
-                        const title = this.dataset.title || '';
-                        e.preventDefault();
+                        const title = this.dataset.title || (this.textContent || '').trim();
                         openMedia(type, src, title);
                     };
                     link.addEventListener('click', handler);
                     link._mediaClickHandler = handler;
                 });
             }
-
-            attachMediaLinks();
 
             function openMedia(type, src, title) {
                 const container = document.getElementById('mediaContainer');
@@ -522,6 +480,59 @@
 
                 mediaModal.show();
             }
+
+            function filterContentBySubject(subjectKey) {
+                document.querySelectorAll('.feature-card').forEach(card => {
+                    card.querySelectorAll('.content-list-item').forEach(item => {
+                        const itemSubj = (item.getAttribute('data-subject') || '').trim();
+                        const show = (!itemSubj) || (subjectKey && itemSubj === subjectKey) || (!subjectKey);
+                        item.style.display = show ? '' : 'none';
+                    });
+                });
+            }
+
+            function openFeaturesPage(subjectKey, focusFeature) {
+                const subject = subjects[subjectKey] || { title: subjectKey || 'Subject', icon: '', color: '' };
+                pageTitle.textContent = subject.title;
+                pageIcon.className = `page-icon ${subject.color}`;
+                pageIcon.innerHTML = subject.icon ? `<i class="${subject.icon}"></i>` : '';
+                subjectsGrid.style.display = 'none';
+                featuresPage.style.display = 'block';
+                featuresPage.setAttribute('aria-hidden', 'false');
+                filterContentBySubject(subjectKey);
+                attachMediaLinks();
+                if (focusFeature) {
+                    const el = document.getElementById('feature-' + focusFeature);
+                    if (el) {
+                        document.querySelectorAll('.feature-card').forEach(f => f.classList.remove('highlight'));
+                        el.classList.add('highlight');
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        setTimeout(()=> openFirstVisibleMediaIn(el), 250);
+                    }
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function openFirstVisibleMediaIn(featureEl) {
+                const visibleItem = Array.from(featureEl.querySelectorAll('.content-list-item'))
+                    .find(it => it.style.display !== 'none' && it.querySelector('.media-link'));
+                if (visibleItem) {
+                    const link = visibleItem.querySelector('.media-link');
+                    if (link) link.click();
+                }
+            }
+
+            backButton.addEventListener('click', function() {
+                featuresPage.style.display = 'none';
+                featuresPage.setAttribute('aria-hidden', 'true');
+                subjectsGrid.style.display = 'grid';
+                document.querySelectorAll('.feature-card').forEach(f => f.classList.remove('highlight'));
+                filterContentBySubject(null);
+            });
+
+            // attach click handler to previously JS-only open-feature buttons removed in favor of server browse links
+            // initialize media links on page load
+            attachMediaLinks();
 
             document.getElementById('mediaModal').addEventListener('hidden.bs.modal', function () {
                 const container = document.getElementById('mediaContainer');
