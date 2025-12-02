@@ -214,12 +214,19 @@
             </div>
 
             <!-- Hindi Card -->
-            <div class="subject-card hindi floating" data-subject="hindi">
-                <div class="subject-icon">
-                    <i class="fas fa-language"></i>
-                </div>
-                <h3 class="subject-title">Hindi</h3>
-            </div>
+            <div class="subject-card hindi" data-subject="hindi">
+        <div>
+          <div class="subject-icon"><i class="fa-solid fa-language"></i></div>
+          <div class="subject-title">Hindi</div>
+          <div class="subject-teacher">Mr. Vikram Joshi</div>
+        </div>
+        <div>
+          <div class="feature-actions">
+            <a class="btn-primary browse-link" href="{{ url_for('browse_feature', feature='audio') }}?subject=hindi" data-feature="audio" data-subject="hindi"><i class="fa-solid fa-headphones"></i> Browse Audio</a>
+            <a class="btn-outline browse-link" href="{{ url_for('browse_feature', feature='flashcards') }}?subject=hindi" data-feature="flashcards" data-subject="hindi"><i class="fa-solid fa-clone"></i> Flashcards</a>
+          </div>
+        </div>
+      </div>
         </div>
 
         <!-- Features Page (kept for in-page browsing fallback) -->
