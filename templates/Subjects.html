@@ -49,12 +49,31 @@
         }
         
         /* Modern Navbar */
+
+        /* Update the navbar z-index */
         .navbar {
             background: rgba(255, 255, 255, 0.95) !important;
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding: 15px 0;
+            z-index: 99;          /* ADD THIS LINE */
+            position: relative;   /* ADD THIS LINE */
+        }
+
+        /* Update the features overlay z-index */
+        .features-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;        /* CHANGE FROM 1000 TO 2000 */
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .navbar-brand {
