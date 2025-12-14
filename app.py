@@ -136,8 +136,8 @@ CLASSES = [
 
 FOUNDERS = [
     {'id': 1, 'name': 'Anjali Jain', 'position': 'Founder & CEO', 'image': 'img/team-1.jpg', 'social': {'facebook': 'https://facebook.com', 'twitter': 'https://twitter.com', 'instagram': 'https://instagram.com'}},
-    {'id': 2, 'name': 'Jane Smith', 'position': 'Co-Founder & CTO', 'image': 'img/team-2.jpg', 'social': {'facebook': 'https://facebook.com', 'twitter': 'https://twitter.com', 'instagram': 'https://instagram.com'}},
-    {'id': 3, 'name': 'Mike Johnson', 'position': 'Head of Curriculum', 'image': 'img/team-3.jpg', 'social': {'facebook': 'https://facebook.com', 'twitter': 'https://twitter.com', 'instagram': 'https://instagram.com'}}
+    {'id': 2, 'name': 'Ajay Rajput', 'position': 'Co-Founder & CTO', 'image': 'img/team-2.jpg', 'social': {'facebook': 'https://facebook.com', 'twitter': 'https://twitter.com', 'instagram': 'https://instagram.com'}},
+    {'id': 3, 'name': 'Ishika Khanchandani', 'position': 'Head of Curriculum', 'image': 'img/team-3.jpg', 'social': {'facebook': 'https://facebook.com', 'twitter': 'https://twitter.com', 'instagram': 'https://instagram.com'}}
 ]
 
 @app.route('/')
