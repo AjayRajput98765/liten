@@ -3,14 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from sqlalchemy.exc import OperationalError
 from datetime import datetime
-from sqlalchemy import func
+from sqlalchemy import func, text
 from flask import abort
 import os
 import sys
 import getpass
 import sqlite3
-from sqlalchemy.exc import OperationalError
+
 
 app = Flask(__name__)
 
@@ -458,7 +459,6 @@ def view_subscribers():
     subscribers = NewsletterSubscriber.query.order_by(NewsletterSubscriber.subscribed_at.desc()).all()
     return render_template('admin_subscribers.html', subscribers=subscribers)
 
-
 @app.route('/browse/<feature>')
 @login_required
 def browse_feature(feature):
@@ -471,22 +471,34 @@ def browse_feature(feature):
     user_grade = current_user.grade if getattr(current_user, 'grade', None) else None
 
     q = Content.query.filter_by(type=feature)
+
     if user_grade:
         q = q.filter((Content.grade == None) | (Content.grade == str(user_grade)))
 
     if subject:
-        # normalize incoming subject and DB subject: lower-case, convert hyphens/underscores to spaces
-        subj_norm = subject.replace('-', ' ').replace('_', ' ').strip().lower()
-        db_subject_normalized = func.lower(
-            func.replace(
-                func.replace(func.coalesce(Content.subject, ''), '-', ' '),
-                '_', ' '
+        subj_norm = " ".join(
+            subject.replace('-', ' ').replace('_', ' ').strip().lower().split()
+        )
+
+        db_norm = func.lower(
+            func.trim(
+                func.replace(
+                    func.replace(
+                        func.replace(Content.subject, '-', ' '),
+                        '_', ' '
+                    ),
+                "  ", " "  # Initial double-space normalization
+                )
             )
         )
-        q = q.filter(db_subject_normalized == subj_norm)
+
+        q = q.filter(db_norm == subj_norm)
 
     contents = q.order_by(Content.uploaded_at.desc()).all()
-    return render_template('browse.html', contents=contents, feature=feature, subject=subject, current_user=current_user)
+
+    return render_template('browse.html', contents=contents,
+                           feature=feature, subject=subject,
+                           current_user=current_user)
 # ...existing code...
 
 @app.route('/dev-login')
