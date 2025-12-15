@@ -66,7 +66,7 @@ def load_user(user_id):
 ALLOWED_EXT = {
     'video': {'mp4', 'mkv', 'webm', 'mov', 'avi'},
     'notes': {'pdf'},
-    'flashcards': {'json', 'csv'},
+    'flashcards': {'json', 'csv','png','jpg','jpeg'},
     'audio': {'mp3', 'wav', 'm4a', 'aac'}
 }
 
