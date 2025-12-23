@@ -67,7 +67,9 @@ ALLOWED_EXT = {
     'video': {'mp4', 'mkv', 'webm', 'mov', 'avi'},
     'notes': {'pdf'},
     'flashcards': {'json', 'csv','png','jpg','jpeg'},
-    'audio': {'mp3', 'wav', 'm4a', 'aac'}
+    'audio': {'mp3', 'wav', 'm4a', 'aac'},
+    'important-questions': {'pdf', 'json'},
+    'pyq-questions': {'pdf', 'json'}
 }
 
 def allowed_file(filename, content_type):
@@ -366,8 +368,6 @@ def delete_subscriber(subscriber_id):
     db.session.commit()
     return redirect(url_for('admin_panel'))
 
-# ...existing code...
-
 @app.route('/upload_content', methods=['POST'])
 @login_required
 def upload_content():
@@ -441,8 +441,6 @@ def delete_content(content_id):
     db.session.commit()
     return redirect(url_for('admin_panel'))
 
-# ...existing code...
-
 @app.route('/admin/appointments')
 @login_required
 def view_appointments():
@@ -463,7 +461,7 @@ def view_subscribers():
 @login_required
 def browse_feature(feature):
     feature = (feature or '').lower()
-    allowed = {'video', 'audio', 'notes', 'flashcards'}
+    allowed = {'video', 'audio', 'notes', 'flashcards', 'important-questions', 'pyq-questions'}
     if feature not in allowed:
         return redirect(url_for('dashboard'))
 
@@ -499,7 +497,6 @@ def browse_feature(feature):
     return render_template('browse.html', contents=contents,
                            feature=feature, subject=subject,
                            current_user=current_user)
-# ...existing code...
 
 @app.route('/dev-login')
 def dev_login():

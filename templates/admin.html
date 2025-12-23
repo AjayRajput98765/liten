@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Admin Dashboard - Liten</title>
+  <title>Admin Dashboard - Addtech</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -14,7 +14,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{{ url_for('index') }}">Liten Admin</a>
+    <a class="navbar-brand" href="{{ url_for('index') }}">Addtech Admin</a>
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><span class="nav-link">Signed in as <strong>{{ current_user.username }}</strong></span></li>
@@ -179,7 +179,7 @@
 
     <div class="tab-pane fade" id="content" role="tabpanel">
       <h5>Upload Course Content</h5>
-      <p class="small-muted">Upload video lectures, notes (PDF), flashcards (JSON/CSV), or audio books. Set target grade and subject.</p>
+      <p class="small-muted">Upload video lectures, notes (PDF), flashcards, audio books, important questions, or previous year questions. Set target grade and subject.</p>
 
       <form id="contentUploadForm" method="post" action="{{ url_for('upload_content') }}" enctype="multipart/form-data" class="border p-3 rounded">
         <div class="row g-2">
@@ -191,6 +191,8 @@
               <option value="notes">Notes (PDF)</option>
               <option value="flashcards">Flashcards</option>
               <option value="audio">Audio Book</option>
+              <option value="important-questions">Important Questions</option>
+              <option value="pyq-questions">PYQ Questions</option>
             </select>
           </div>
 
@@ -229,7 +231,7 @@
           <div class="col-md-8">
             <label class="form-label">File</label>
             <input name="file" type="file" class="form-control" required>
-            <div class="small-muted mt-1">Allowed: videos, pdfs, audio, json/csv for flashcards.</div>
+            <div class="small-muted mt-1">Allowed: videos (mp4, mkv, webm, mov, avi), PDFs, audio (mp3, wav, m4a, aac), JSON/CSV for flashcards, PDF/JSON for questions.</div>
           </div>
 
           <div class="col-md-4 d-flex align-items-end">
@@ -260,7 +262,9 @@
             {% for c in contents %}
             <tr>
               <td class="monospace">{{ c.id }}</td>
-              <td>{{ c.type }}</td>
+              <td>
+                <span class="badge bg-info">{{ c.type }}</span>
+              </td>
               <td>{{ c.subject or 'General' }}</td>
               <td style="max-width:20rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ c.title }}</td>
               <td>{{ c.grade or 'All' }}</td>
@@ -282,6 +286,17 @@
         <div class="small-muted">No uploaded content yet.</div>
       {% endif %}
 
+      <div class="mt-4 p-3 bg-light border rounded">
+        <h6 class="mb-2">Content Type Guide</h6>
+        <ul class="small-muted mb-0">
+          <li><strong>Video Lecture:</strong> Supported formats - mp4, mkv, webm, mov, avi</li>
+          <li><strong>Notes:</strong> PDF format only</li>
+          <li><strong>Flashcards:</strong> JSON or CSV format</li>
+          <li><strong>Audio Book:</strong> Supported formats - mp3, wav, m4a, aac</li>
+          <li><strong>Important Questions:</strong> PDF or JSON format - Most frequently asked exam questions</li>
+          <li><strong>PYQ Questions:</strong> PDF or JSON format - Previous Year Question papers</li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>
