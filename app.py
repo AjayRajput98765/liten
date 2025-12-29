@@ -20,7 +20,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///addtech.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_SORT_KEYS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB max
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB global max (can be overridden per-type)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -72,11 +72,33 @@ ALLOWED_EXT = {
     'pyq-questions': {'pdf', 'json'}
 }
 
+# Per-type file size limits (in bytes) - per individual file
+FILE_SIZE_LIMITS = {
+    'video': 500 * 1024 * 1024,      # 500 MB per video file
+    'notes': 50 * 1024 * 1024,       # 50 MB per notes file
+    'flashcards': 10 * 1024 * 1024,  # 10 MB per flashcards file
+    'audio': 100 * 1024 * 1024,      # 100 MB per audio file
+    'important-questions': 50 * 1024 * 1024,  # 50 MB per file
+    'pyq-questions': 50 * 1024 * 1024         # 50 MB per file
+}
+
 def allowed_file(filename, content_type):
     if not filename or '.' not in filename:
         return False
     ext = filename.rsplit('.', 1)[1].lower()
     return ext in ALLOWED_EXT.get(content_type, set())
+
+def get_max_file_size(content_type):
+    """Get the maximum file size for a content type in bytes"""
+    return FILE_SIZE_LIMITS.get(content_type, 50 * 1024 * 1024)  # Default 50 MB
+
+def format_file_size(bytes_size):
+    """Convert bytes to human-readable format"""
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if bytes_size < 1024:
+            return f"{bytes_size:.2f} {unit}"
+        bytes_size /= 1024
+    return f"{bytes_size:.2f} TB"
 
 def ensure_upload_folder(path):
     os.makedirs(path, exist_ok=True)
@@ -93,7 +115,6 @@ def _ensure_db_has_subject_column():
     try:
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
-        # Try both lowercase and capitalized table name just in case
         cur.execute("PRAGMA table_info('content')")
         cols = [r[1] for r in cur.fetchall()]
         if not cols:
@@ -103,7 +124,6 @@ def _ensure_db_has_subject_column():
             try:
                 cur.execute("ALTER TABLE content ADD COLUMN subject TEXT")
             except sqlite3.OperationalError:
-                # fallback if table name case differs
                 cur.execute("ALTER TABLE Content ADD COLUMN subject TEXT")
             conn.commit()
     except Exception as e:
@@ -236,7 +256,6 @@ def dashboard():
         else:
             contents = Content.query.order_by(Content.uploaded_at.desc()).all()
     except OperationalError as e:
-        # If the DB schema is missing the subject column, try to add it and retry once
         err = str(e).lower()
         if 'no such column' in err or 'no such table' in err:
             _ensure_db_has_subject_column()
@@ -298,7 +317,9 @@ def admin_panel():
     appointments = Appointment.query.order_by(Appointment.created_at.desc()).all()
     subscribers = NewsletterSubscriber.query.order_by(NewsletterSubscriber.subscribed_at.desc()).all()
     contents = Content.query.order_by(Content.uploaded_at.desc()).all()
-    return render_template('admin.html', users=users, appointments=appointments, subscribers=subscribers, classes=CLASSES, contents=contents, current_user=current_user)
+    # Pass file size limits and formatter to template
+    size_limits = {k: format_file_size(v) for k, v in FILE_SIZE_LIMITS.items()}
+    return render_template('admin.html', users=users, appointments=appointments, subscribers=subscribers, classes=CLASSES, contents=contents, current_user=current_user, file_size_limits=size_limits)
 
 @app.route('/add_student', methods=['POST'])
 @login_required
@@ -379,10 +400,23 @@ def upload_content():
     subject = request.form.get('subject') or None
     description = request.form.get('description')
     file = request.files.get('file')
+    
     if not content_type or not title or not file:
         return redirect(url_for('admin_panel'))
+    
     if not allowed_file(file.filename, content_type):
         return redirect(url_for('admin_panel'))
+    
+    # Check file size for the specific content type
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
+    
+    max_size = get_max_file_size(content_type)
+    if file_size > max_size:
+        print(f"File too large: {file.filename} ({format_file_size(file_size)}) exceeds limit of {format_file_size(max_size)} for {content_type}")
+        return redirect(url_for('admin_panel'))
+    
     target_folder = os.path.join(app.config['UPLOAD_FOLDER'], content_type)
     ensure_upload_folder(target_folder)
     filename = secure_filename(file.filename)
@@ -391,7 +425,6 @@ def upload_content():
     save_path = os.path.join(target_folder, saved_name)
     file.save(save_path)
 
-    # store forward-slash path for URLs (cross-platform)
     rel_path = f"{content_type}/{saved_name}"
     content = Content(type=content_type, title=title, filename=rel_path, description=description, grade=grade, subject=subject)
     db.session.add(content)
@@ -400,12 +433,10 @@ def upload_content():
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
-    # normalize filename coming from URL: convert any backslashes, trim leading slashes
     safe_rel = filename.replace('\\', '/').lstrip('/')
     uploads_root = os.path.abspath(app.config['UPLOAD_FOLDER'])
     full_path = os.path.abspath(os.path.join(uploads_root, safe_rel))
 
-    # Prevent directory traversal: full_path must be inside uploads_root
     if not (full_path == uploads_root or full_path.startswith(uploads_root + os.sep)):
         abort(404)
 
@@ -422,7 +453,6 @@ def delete_content(content_id):
         return redirect(url_for('dashboard'))
     content = Content.query.get_or_404(content_id)
     try:
-        # normalize stored filename and build platform-safe path
         safe_rel = (content.filename or '').replace('\\', '/').lstrip('/')
         file_path = os.path.abspath(os.path.join(app.config['UPLOAD_FOLDER'], safe_rel))
         uploads_root = os.path.abspath(app.config['UPLOAD_FOLDER'])
@@ -485,7 +515,7 @@ def browse_feature(feature):
                         func.replace(Content.subject, '-', ' '),
                         '_', ' '
                     ),
-                "  ", " "  # Initial double-space normalization
+                "  ", " "
                 )
             )
         )
