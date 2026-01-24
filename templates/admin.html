@@ -5,17 +5,24 @@
   <title>Admin Dashboard - Addtech</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
   <style>
     .monospace { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", monospace; }
     .small-muted { font-size: .85rem; color: #6c757d; }
     .file-input-label { cursor: pointer; }
+    .stat-card { min-width: 9rem; }
+    .table-hover tbody tr:hover { background-color: #f8f9fa; }
+    .search-input { max-width: 360px; }
   </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="{{ url_for('index') }}">Addtech Admin</a>
-    <div class="collapse navbar-collapse">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><span class="nav-link">Signed in as <strong>{{ current_user.username }}</strong></span></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
@@ -26,6 +33,25 @@
 
 <div class="container my-4">
   <h2 class="mb-3">Administrator Control Panel</h2>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <div class="card stat-card p-2 text-center">
+      <div class="h4 mb-0">{{ users|length if users is defined else 0 }}</div>
+      <div class="small-muted">Students</div>
+    </div>
+    <div class="card stat-card p-2 text-center">
+      <div class="h4 mb-0">{{ appointments|length if appointments is defined else 0 }}</div>
+      <div class="small-muted">Appointments</div>
+    </div>
+    <div class="card stat-card p-2 text-center">
+      <div class="h4 mb-0">{{ subscribers|length if subscribers is defined else 0 }}</div>
+      <div class="small-muted">Subscribers</div>
+    </div>
+    <div class="card stat-card p-2 text-center">
+      <div class="h4 mb-0">{{ contents|length if contents is defined else 0 }}</div>
+      <div class="small-muted">Content</div>
+    </div>
+  </div>
 
   <ul class="nav nav-tabs" id="adminTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -44,9 +70,12 @@
 
   <div class="tab-content border border-top-0 p-3" id="adminTabsContent">
     <div class="tab-pane fade show active" id="students" role="tabpanel">
-      <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2 gap-2">
         <h5 class="mb-0">Registered Students</h5>
-        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">Add Student</button>
+        <div class="d-flex gap-2">
+          <input id="studentSearch" class="form-control form-control-sm search-input" placeholder="Search students by name or email">
+          <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">Add Student</button>
+        </div>
       </div>
 
       {% if users %}
@@ -244,44 +273,63 @@
       <h6 class="mt-3">Current Content (preview)</h6>
 
       {% if contents %}
-      <div class="table-responsive">
-        <table class="table table-sm table-hover align-middle">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Type</th>
-              <th>Subject</th>
-              <th>Title</th>
-              <th>Grade</th>
-              <th>Filename</th>
-              <th>Uploaded</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for c in contents %}
-            <tr>
-              <td class="monospace">{{ c.id }}</td>
-              <td>
-                <span class="badge bg-info">{{ c.type }}</span>
-              </td>
-              <td>{{ c.subject or 'General' }}</td>
-              <td style="max-width:20rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ c.title }}</td>
-              <td>{{ c.grade or 'All' }}</td>
-              <td class="monospace" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.filename }}</td>
-              <td class="small-muted">{{ c.uploaded_at.strftime('%Y-%m-%d %H:%M') if c.uploaded_at else '-' }}</td>
-              <td class="text-end">
-                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('uploaded_file', filename=c.filename) }}" target="_blank">Open</a>
-
-                <form action="{{ url_for('delete_content', content_id=c.id) }}" method="post" style="display:inline-block;margin-left:8px;" onsubmit="return confirm('Delete this uploaded content?');">
-                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                </form>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+        {% set types = contents|map(attribute='type')|list|unique %}
+        <div class="accordion" id="contentAccordion">
+          {% for t in types %}
+            {% set items = contents | selectattr('type','equalto',t) | list %}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="heading{{ loop.index }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
+                  {{ t|capitalize }} <span class="small-muted ms-2">({{ items|length }})</span>
+                </button>
+              </h2>
+              <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#contentAccordion">
+                <div class="accordion-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                      <thead>
+                        <tr>
+                          <th style="width:6rem;">ID</th>
+                          <th>Type</th>
+                          <th>Subject</th>
+                          <th>Title</th>
+                          <th>Grade</th>
+                          <th>Filename</th>
+                          <th>Uploaded</th>
+                          <th class="text-end">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for c in items %}
+                        <tr class="{% if loop.index > 5 %}extra-row d-none{% endif %}">
+                          <td class="monospace text-truncate" style="max-width:80px;" title="{{ c.id }}">{{ c.id }}</td>
+                          <td><span class="badge bg-info">{{ c.type }}</span></td>
+                          <td>{{ c.subject or 'General' }}</td>
+                          <td class="text-truncate" style="max-width:20rem;" title="{{ c.title }}">{{ c.title }}</td>
+                          <td>{{ c.grade or 'All' }}</td>
+                          <td class="monospace text-truncate" style="max-width:200px;" title="{{ c.filename }}">{{ c.filename }}</td>
+                          <td class="small-muted">{{ c.uploaded_at.strftime('%Y-%m-%d %H:%M') if c.uploaded_at else '-' }}</td>
+                          <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('uploaded_file', filename=c.filename) }}" target="_blank">Open</a>
+                            <form action="{{ url_for('delete_content', content_id=c.id) }}" method="post" style="display:inline-block;margin-left:8px;" onsubmit="return confirm('Delete this uploaded content?');">
+                              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% if items|length > 5 %}
+                      <div class="p-2 text-center">
+                        <button class="btn btn-sm btn-outline-secondary toggle-more" data-type="{{ t }}">Show {{ items|length - 5 }} more</button>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
       {% else %}
         <div class="small-muted">No uploaded content yet.</div>
       {% endif %}
@@ -335,5 +383,37 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function(){
+    const input = document.getElementById('studentSearch');
+    if (!input) return;
+    input.addEventListener('input', function(e){
+      const q = e.target.value.trim().toLowerCase();
+      const rows = document.querySelectorAll('#studentsTable tbody tr');
+      rows.forEach(r=>{
+        const text = r.innerText.toLowerCase();
+        r.style.display = q === '' || text.indexOf(q) !== -1 ? '' : 'none';
+      });
+    });
+  })();
+</script>
+<script>
+  (function(){
+    document.querySelectorAll('.toggle-more').forEach(btn=>{
+      btn.addEventListener('click', function(){
+        const wrapper = btn.closest('.accordion-item');
+        if (!wrapper) return;
+        const hiddenRows = wrapper.querySelectorAll('tr.extra-row');
+        const isHidden = hiddenRows.length && hiddenRows[0].classList.contains('d-none');
+        hiddenRows.forEach(r=> r.classList.toggle('d-none', !isHidden));
+        if (isHidden) {
+          btn.textContent = 'Show less';
+        } else {
+          btn.textContent = `Show ${hiddenRows.length} more`;
+        }
+      });
+    });
+  })();
+</script>
 </body>
 </html>
